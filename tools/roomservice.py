@@ -139,6 +139,11 @@ def indent(elem, level=0):
         if level and (not elem.tail or not elem.tail.strip()):
             elem.tail = i
 
+def get_default_revision():
+    m = ElementTree.parse(".repo/manifest.xml")
+    d = m.findall('default')[0]
+    r = d.get('revision')
+    return r.replace('refs/heads/', '').replace('refs/tags/', '')
 
 def create_manifest_project(url, directory,
                             remote=default_rem,
@@ -204,6 +209,12 @@ def parse_device_from_folder(device):
         location = parse_device_from_manifest(device)
     return location
 
+    if len(syncable_repos) > 0:
+        print('Syncing dependencies')
+        os.system('repo sync --force-sync %s' % ' '.join(syncable_repos))
+
+    for deprepo in syncable_repos:
+        fetch_dependencies(deprepo)
 
 def parse_dependency_file(location):
     dep_file = "carbon.dependencies"
